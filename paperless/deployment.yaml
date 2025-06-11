@@ -16,14 +16,31 @@ spec:
         app: paperless
     spec:
       containers:
-        - image: ghcr.io/paperless-ngx/paperless-ngx:2.16.2
-          name: paperless-ngx
-          ports:
-            - containerPort: 8000
+        - name: paperless-ngx
+          image: ghcr.io/paperless-ngx/paperless-ngx:2.16.2
+          volumeMounts:
+            - name: paperless-data
+              mountPath: "/usr/src/paperless/data"
+            - name: paperless-media
+              mountPath: "/usr/src/paperless/media"
+            - name: paperless-consume
+              mountPath: "/usr/src/paperless/consume"
           env:
             - name: PAPERLESS_REDIS
               value: redis://localhost:6379
+          ports:
+            - containerPort: 8000
         - image: redis:7
           name: redis
           ports:
             - containerPort: 6379
+      volumes:
+        - name: paperless-data
+          persistentVolumeClaim:
+            claimName: paperless-data
+        - name: paperless-media
+          persistentVolumeClaim:
+            claimName: paperless-media
+        - name: paperless-consume
+          persistentVolumeClaim:
+            claimName: paperless-consume
